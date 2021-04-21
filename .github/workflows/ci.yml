@@ -1,0 +1,59 @@
+name: Swimbundles CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.9
+        with:
+          versionSpec: "5.x"
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.9
+        with:
+          useConfigFile: true
+
+      - name: Create Folder
+        run: mkdir output
+
+      - name: Docker Run Action
+        run: |
+          docker run \
+          --mount type=bind,source='${{ github.workspace }}',target='/integrations/src/integration' --mount type=bind,source='${{ github.workspace }}/output',target='/integrations/dist' \
+          swimlane/btb-build:0.1.11-beta.1-ef7e0fc
+
+      - name: Create Dev Bundle
+        if: ${{ steps.gitversion.outputs.preReleaseLabel != '' }}
+        run: find output -name '*.swimbundle' -exec sh -c 'mv "$0" "${0%.swimbundle}.dev.swimbundle"' {} \;
+
+      - name: Archive integration
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration
+          path: |
+            output/**/*.swimbundle
+
+      - name: Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          title: "${{ steps.gitversion.outputs.semVer}}"
+          automatic_release_tag: "${{ steps.gitversion.outputs.semVer}}"
+          prerelease: ${{ steps.gitversion.outputs.preReleaseLabel != '' }}
+          files: |
+            CHANGELOG.md
+            output/**/*.swimbundle
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
