@@ -18,6 +18,9 @@ class SwMain(SixgillAPIRequests):
         """process the actionable alerts."""
 
         if alert.get('id') not in self.state and alert.get('alert_name') not in SKIP_ALERTS:
+
+            self.state.update({alert.get('id'): True})
+
             alert_info_raw_response = self.get_alert_info(alert.get('id'))
             alert_content_raw_response = self.get_alert_content(alert.get('id'))
             alert_item_content = {'site': '', 'creator': '', 'content': '', 'title': '',
@@ -39,8 +42,6 @@ class SwMain(SixgillAPIRequests):
                                                          alert_item_content.get('title'),
                                                          alert_item_content.get(
                                                              'tags')).__dict__
-
-            self.state.update({alert.get('id'): True})
 
             return raw_response
 
@@ -81,5 +82,5 @@ class SwMain(SixgillAPIRequests):
                 self.update_most_recent_actionable_alert()
 
             return self.actionable_alerts
-        except Exception as e:
-            return {'errorMessage': str(e)}
+        except Exception:
+            raise

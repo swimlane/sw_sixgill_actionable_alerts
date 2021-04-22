@@ -9,8 +9,9 @@ class SixgillActionableAlertsBaseClass(object):
         self.client_id = context.asset.get('client_id', '')
         self.client_secret = context.asset.get('client_secret', '')
         self.verify = context.asset.get('verify_ssl', False)
+        self.organization_id = context.asset.get('organization_id', None)
         http_proxy = context.asset.get('http_proxy')
-        session = requests.session()
+        session = requests.Session()
         session.proxies = {} if not http_proxy else http_proxy
         self.proxy = session
         self.state = context.state
@@ -33,19 +34,23 @@ class SixgillAPIRequests(SixgillActionableAlertsBaseClass):
 
     def get_actionable_alerts(self, offset):
         """returns the list of actionable alerts."""
-        raw_response = self.sixgill_alert_client.get_actionable_alerts_bulk(offset=offset)
+        raw_response = self.sixgill_alert_client.get_actionable_alerts_bulk(offset=offset,
+                                                                            organization_id=self.organization_id)
 
         return raw_response
 
     def get_alert_info(self, alert_id):
         """returns the actionable alert info for the specific actionable alert id."""
-        alert_info_response = self.sixgill_alert_client.get_actionable_alert(alert_id)
+        alert_info_response = self.sixgill_alert_client.get_actionable_alert(actionable_alert_id=alert_id,
+                                                                             organization_id=self.organization_id)
 
         return alert_info_response
 
     def get_alert_content(self, alert_id):
         """returns the actionable alert content for the specific actionable alert id."""
-        alert_content_response = self.sixgill_alert_client.get_actionable_alert_content(alert_id)
+        alert_content_response = self.sixgill_alert_client.get_actionable_alert_content(
+            actionable_alert_id=alert_id,
+            organization_id=self.organization_id)
 
         return alert_content_response.get('items')
 

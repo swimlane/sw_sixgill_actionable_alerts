@@ -1,11 +1,11 @@
 {
   "name": "Sixgill Actionable Alerts",
   "description": "Actionable Alerts API",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "family": "Investigation",
   "actionType": "SixgillActionableAlertsExample",
   "assetDependencyType": "SixgillActionableAlerts",
-  "assetDependencyVersion": "1.0.0",
+  "assetDependencyVersion": "1.1.0",
   "inputParameters": {},
   "availableOutputTypes": [
     "email",
@@ -18,97 +18,61 @@
     "alert_id": {
       "name": "Alert ID",
       "description": "Sixgill Actionable Alert ID",
-      "example": "",
-      "required": true,
-      "unique": true,
       "type": 1
     },
     "sixgill_portal_reference": {
       "name": "Sixgill Portal Reference",
       "description": "Sixgill Portal Reference",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "alert_title": {
       "name": "Alert Title",
       "description": "Sixgill Actionable Alert Title",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "threat_level": {
       "name": "Threat Level",
       "description": "Threat Level",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "threat_actor": {
       "name": "Threat Actor",
       "description": "Threat Actor",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "source": {
       "name": "Source",
       "description": "Source",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "language": {
       "name": "Language",
       "description": "Language",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "item_title": {
       "name": "Item Title",
       "description": "Item Title",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "date": {
       "name": "Date",
       "description": "Date",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 1
     },
     "item_content": {
       "name": "Item Content",
       "description": "Item Content",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 2
     },
     "tags": {
       "name": "Tags",
       "description": "Tags",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 5
     },
     "threat_types": {
       "name": "Threat Types",
       "description": "Threat Types",
-      "example": "",
-      "required": false,
-      "unique": false,
       "type": 5
     }
   },

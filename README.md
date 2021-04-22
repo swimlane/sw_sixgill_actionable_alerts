@@ -26,6 +26,7 @@ The asset for this plugin requires the following inputs:
 * Client Secret
 * verify SSL
 * Proxy
+* Organization Id
  
 ## Tasks Setup
 
@@ -34,4 +35,6 @@ The task for this plugin doesn't requires inputs.
 ## Notes
 
 Sixgill Support - https://support.cybersixgill.com
-This plugin was last tested against product version: !*CHANGEME*!.
+This plugin was last tested against product version: 1.0.0.
+
+This plugin was last tested against product version: 1.1.0.
