@@ -1,17 +1,39 @@
-name: Swimbundles CI
+name: ci
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: write # for checkout and tag
+
+env:
+  sdk_version: "latest"
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      - name: setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install swsdk
+        run: |
+          npm install -g @swimlane/swimlane-sdk@${{ env.sdk_version }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install swsdk plugins
+        run: |
+          swsdk plugins:install @swimlane/swsdk-admin@${{ env.sdk_version }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.9
         with:
@@ -21,20 +43,34 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get Integration Version
+        id: version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+          path: "package.json"
+          prop_path: "version"
+
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.9
         with:
           useConfigFile: true
+          additionalArguments: "/overrideconfig next-version=${{steps.version.outputs.prop}}"
 
       - name: Create Folder
         run: mkdir output
 
-      - name: Docker Run Action
+      # - name: Lint Integtration
+      #   run: |
+      #     swsdk integration:lint
+
+      - name: Validate Integtration
         run: |
-          docker run \
-          --mount type=bind,source='${{ github.workspace }}',target='/integrations/src/integration' --mount type=bind,source='${{ github.workspace }}/output',target='/integrations/dist' \
-          swimlane/btb-build:0.1.11-beta.1-ef7e0fc
+          swsdk integration:validate
+
+      - name: Build Integtration
+        run: |
+          swsdk integration:build
 
       - name: Create Dev Bundle
         if: ${{ steps.gitversion.outputs.preReleaseLabel != '' }}
@@ -46,14 +82,3 @@ jobs:
           name: integration
           path: |
             output/**/*.swimbundle
-
-      - name: Release
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          title: "${{ steps.gitversion.outputs.semVer}}"
-          automatic_release_tag: "${{ steps.gitversion.outputs.semVer}}"
-          prerelease: ${{ steps.gitversion.outputs.preReleaseLabel != '' }}
-          files: |
-            CHANGELOG.md
-            output/**/*.swimbundle
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
