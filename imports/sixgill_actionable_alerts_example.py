@@ -1,4 +1,4 @@
-from sw_sixgill_actionable_alerts import SixgillActionableAlertsBaseClass, SwimlaneActionableAlertFields, \
+from sw_cybersixgill_actionable_alerts import SixgillActionableAlertsBaseClass, SwimlaneActionableAlertFields, \
     SixgillAPIRequests
 from datetime import datetime
 
@@ -22,10 +22,13 @@ class SwMain(SixgillAPIRequests):
             self.state.update({alert.get('id'): True})
 
             alert_info_raw_response = self.get_alert_info(alert.get('id'))
-            alert_content_raw_response = self.get_alert_content(alert.get('id'))
+
             alert_item_content = {'site': '', 'creator': '', 'content': '', 'title': '',
                                   'tags': []}
-            if alert_info_raw_response.get('es_id') is not None:
+            alert_content_raw_response = ''
+            if alert_info_raw_response.get('es_id') is not None and alert_info_raw_response.get(
+                    'es_id') != 'Not Applicable':
+                alert_content_raw_response = self.get_alert_content(alert.get('id'))
                 for item in alert_content_raw_response:
                     if item.get('_id') == alert_info_raw_response.get('es_id'):
                         alert_item_content = item.get('_source')

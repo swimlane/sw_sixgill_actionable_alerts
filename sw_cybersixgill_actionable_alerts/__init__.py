@@ -3,7 +3,7 @@ import requests
 from sixgill.sixgill_base_client import SixgillBaseClient
 
 
-class SixgillActionableAlertsBaseClass(object):
+class SixgillActionableAlertsBaseClass:
 
     def __init__(self, context):
         self.client_id = context.asset.get('client_id', '')
@@ -71,4 +71,4 @@ class SwimlaneActionableAlertFields:
         self.item_content = item_content
         self.item_title = item_title
         self.tags = tags
-        self.sixgill_portal_reference = f"https://portal.cybersixgill.com/#/?actionable_alert={alert_id}"
+        self.cybersixgill_portal_reference = f"https://portal.cybersixgill.com/#/?actionable_alert={alert_id}"
