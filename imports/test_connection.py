@@ -1,4 +1,4 @@
-from sw_sixgill_actionable_alerts import SixgillActionableAlertsBaseClass
+from sw_cybersixgill_actionable_alerts import SixgillActionableAlertsBaseClass
 
 
 class SwMain(SixgillActionableAlertsBaseClass):
@@ -8,5 +8,5 @@ class SwMain(SixgillActionableAlertsBaseClass):
             self.auth_test()
         except Exception as e:
             return {'successful': False,
-                    'errorMessage': "Auth request failed - please verify client_id and client_secret."}
+                    'errorMessage': str(e)}
         return {'successful': True}
