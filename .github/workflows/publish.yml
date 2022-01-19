@@ -18,8 +18,13 @@ env:
 jobs:
   publish:
     name: Publish
+    strategy:
+      matrix:
+        PYTHON_VERSION: [3.6, 3.7]
     runs-on: ubuntu-latest
-
+    if: |
+      github.event.repository.is_template == false &&
+      github.event.pull_request.merged == true
     steps:
       - name: setup Node
         uses: actions/setup-node@v2
@@ -51,36 +56,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Integration Version
-        id: version
-        uses: notiz-dev/github-action-json-property@release
+      - name: Load package info
+        id: pjson
+        uses: zoexx/github-action-json-file-properties@release
         with:
-          path: "package.json"
-          prop_path: "version"
+          file_path: "package.json"
 
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.9
         with:
           useConfigFile: true
-          additionalArguments: "/overrideconfig next-version=${{steps.version.outputs.prop}}"
+          additionalArguments: "/overrideconfig next-version=${{steps.pjson.outputs.version}}"
 
       - name: Create Folder
         run: mkdir output
 
-      # - name: Lint Integtration
-      #   run: |
-      #     swsdk integration:lint
-
-      - name: Validate Integtration
+      - name: Validate Integration
         run: |
-          swsdk integration:validate
+          swsdk integration:validate -v=${{matrix.PYTHON_VERSION}}
 
-      - name: Build Integtration
+      - name: Build Integration
         run: |
-          swsdk integration:build
+          swsdk integration:build  -v=${{matrix.PYTHON_VERSION}}
 
       - name: Push to AppHub
+        if: ${{steps.pjson.outputs.private != 'true'}}
         run: |
           find output -name '*.swimbundle' -exec sh -c 'swsdk apphub:push -u ${{ secrets.APPHUB_USERNAME }} -p ${{ secrets.APPHUB_PASSWORD }} --base-url ${{env.APPHUB_URL}} -f "$0"' {} \;
 
@@ -103,6 +104,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/github-script@v4
+        if: github.context.issue.number > 0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |

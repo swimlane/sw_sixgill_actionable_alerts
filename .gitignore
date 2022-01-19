@@ -4,3 +4,13 @@ output/
 dist/
 .idea
 data/
+.DS_Store
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+.czrc
+.python-version
+
+data/

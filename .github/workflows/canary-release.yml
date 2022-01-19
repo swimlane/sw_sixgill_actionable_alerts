@@ -15,8 +15,12 @@ env:
 jobs:
   canary-release:
     name: canary-release
+    strategy:
+      matrix:
+        PYTHON_VERSION: [3.6, 3.7]
     runs-on: self-hosted
     if: |
+      github.event.repository.is_template == false &&
       github.event_name == 'issue_comment' &&
       (github.event.comment.author_association == 'MEMBER' || 
        github.event.comment.author_association == 'OWNER' || 
@@ -77,36 +81,43 @@ jobs:
           repository: ${{ fromJSON(steps.pr.outputs.result).head.repo.full_name }}
           fetch-depth: 0
 
-      - name: Get Integration Version
-        id: version
-        uses: notiz-dev/github-action-json-property@release
+      - name: Load package info
+        id: pjson
+        uses: zoexx/github-action-json-file-properties@release
         with:
-          path: "package.json"
-          prop_path: "version"
+          file_path: "package.json"
 
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.9
         with:
           useConfigFile: true
-          additionalArguments: "/b ${{ fromJSON(steps.pr.outputs.result).head.ref }} /overrideconfig next-version=${{steps.version.outputs.prop}}"
+          additionalArguments: "/b ${{ fromJSON(steps.pr.outputs.result).head.ref }} /overrideconfig next-version=${{steps.pjson.outputs.version}}"
 
       - name: Create Folder
         run: mkdir output
 
-      # - name: Lint Integtration
-      #   run: |
-      #     swsdk integration:lint
-
-      - name: Validate Integtration
+      - name: Validate Integration
         run: |
-          swsdk integration:validate
+          swsdk integration:validate -v=${{matrix.PYTHON_VERSION}}
 
-      - name: Build Integtration
+      - name: Update versions
+        id: updateVersions
         run: |
-          swsdk integration:build
+          swsdk integration:update --version ${{ steps.gitversion.outputs.semVer}}
+
+      - name: Build Integration
+        run: |
+          swsdk integration:build -v=${{matrix.PYTHON_VERSION}}
+
+      - name: Delete existing
+        if: ${{steps.pjson.outputs.private != 'true'}}
+        run: |
+          swsdk apphub:delete -u ${{ secrets.APPHUB_DEV_USERNAME }} -p ${{ secrets.APPHUB_DEV_PASSWORD }} --base-url ${{env.APPHUB_URL}} --owner ${{steps.pjson.outputs.author}} --name ${{steps.pjson.outputs.name}} --version ${{ steps.gitversion.outputs.semVer }}
+        continue-on-error: true
 
       - name: Push to AppHub
+        if: ${{steps.pjson.outputs.private != 'true'}}
         run: |
           find output -name '*.swimbundle' -exec sh -c 'swsdk apphub:push -u ${{ secrets.APPHUB_DEV_USERNAME }} -p ${{ secrets.APPHUB_DEV_PASSWORD }} --log-level debug --base-url ${{env.APPHUB_URL}} -f "$0"' {} \;
 
