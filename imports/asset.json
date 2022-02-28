@@ -1,7 +1,7 @@
 {
   "name": "Cybersixgill Actionable Alerts",
   "type": "CybersixgillActionableAlerts",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Actionable Alerts API",
   "family": "Investigation",
   "inputParameters": {
