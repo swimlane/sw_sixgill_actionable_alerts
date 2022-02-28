@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.2 - 2022-02-28
+
+* Updated the Cybersixgill client package version.
+
 ## 1.1.1 - 2021-12-21
 * Updated the logo and plugin names.
 
