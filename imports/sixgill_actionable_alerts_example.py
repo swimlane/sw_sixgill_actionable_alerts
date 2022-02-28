@@ -2,7 +2,6 @@ from sw_cybersixgill_actionable_alerts import SixgillActionableAlertsBaseClass, 
     SixgillAPIRequests
 from datetime import datetime
 
-SKIP_ALERTS = ["GithubAlertRule"]
 
 MOST_RECENT_ACTIONABLE_ALERT = "most_recent_actionable_alert"
 
@@ -17,7 +16,7 @@ class SwMain(SixgillAPIRequests):
     def process_actionable_alerts(self, alert):
         """process the actionable alerts."""
 
-        if alert.get('id') not in self.state and alert.get('alert_name') not in SKIP_ALERTS:
+        if alert.get('id') not in self.state:
 
             self.state.update({alert.get('id'): True})
 
